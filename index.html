@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flashcards — Reflexão da Luz</title>
+<style>
+  :root{
+    --bg: #0b1420;
+    --card-bg: #ffffff;
+    --ink: #1c2b3a;
+    --muted: #8a97a6;
+    --teal: #17877a;
+    --teal-light: #d9f1ec;
+    --teal-dark: #0e6a5f;
+    --line: #e7ebee;
+  }
+
+  *{ box-sizing:border-box; }
+
+  html,body{
+    margin:0;
+    padding:0;
+    height:100%;
+    background:var(--bg);
+    font-family: 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
+    color:var(--ink);
+  }
+
+  .wrap{
+    max-width:780px;
+    margin:0 auto;
+    padding:56px 24px 40px;
+  }
+
+  .top-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:18px;
+  }
+
+  .counter{
+    color:#9aa7b4;
+    font-size:13px;
+    font-weight:700;
+    letter-spacing:1.5px;
+  }
+
+  .category-badge{
+    background:#ffffff;
+    color:var(--teal-dark);
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:1px;
+    padding:8px 18px;
+    border-radius:999px;
+  }
+
+  .card-stage{
+    perspective:1600px;
+  }
+
+  .card{
+    position:relative;
+    min-height:380px;
+    cursor:pointer;
+  }
+
+  .card-inner{
+    position:relative;
+    width:100%;
+    height:100%;
+    min-height:380px;
+    transition: transform 0.55s cubic-bezier(.4,.2,.2,1);
+    transform-style:preserve-3d;
+  }
+
+  .card.flipped .card-inner{
+    transform: rotateY(180deg);
+  }
+
+  .card-face{
+    position:absolute;
+    inset:0;
+    background:var(--card-bg);
+    border-radius:24px;
+    padding:40px 44px 34px;
+    box-shadow:0 20px 50px rgba(0,0,0,0.35);
+    display:flex;
+    flex-direction:column;
+    backface-visibility:hidden;
+    -webkit-backface-visibility:hidden;
+  }
+
+  .card-face.back{
+    transform: rotateY(180deg);
+  }
+
+  .tag{
+    display:inline-block;
+    align-self:flex-start;
+    background:var(--teal-light);
+    color:var(--teal-dark);
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:1px;
+    padding:7px 16px;
+    border-radius:999px;
+    margin-bottom:22px;
+  }
+
+  .tag.resposta{
+    background:#fdecdb;
+    color:#b5641a;
+  }
+
+  .content-text{
+    font-size:25px;
+    font-weight:800;
+    line-height:1.32;
+    color:#1c2b3a;
+    flex:1;
+    overflow-wrap:break-word;
+  }
+
+  #question-text{
+    font-size:30px;
+  }
+
+  .divider{
+    border:none;
+    border-top:1px solid var(--line);
+    margin:22px 0 16px;
+  }
+
+  .hint{
+    color:var(--muted);
+    font-size:14px;
+  }
+
+  .nav-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-top:28px;
+  }
+
+  .nav-btn{
+    width:48px;
+    height:48px;
+    border-radius:50%;
+    border:none;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    transition: filter 0.15s ease, opacity 0.15s ease;
+  }
+
+  .nav-btn.prev{
+    background:#ffffff;
+    color:#1c2b3a;
+  }
+
+  .nav-btn.next{
+    background:var(--teal);
+    color:#ffffff;
+  }
+
+  .nav-btn:disabled{
+    opacity:0.35;
+    cursor:default;
+  }
+
+  .nav-btn:not(:disabled):hover{
+    filter:brightness(0.95);
+  }
+
+  .dots{
+    display:flex;
+    gap:9px;
+  }
+
+  .dot{
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:#3a4757;
+    cursor:pointer;
+    transition: background 0.15s ease, transform 0.15s ease;
+  }
+
+  .dot.active{
+    background:var(--teal);
+    transform:scale(1.25);
+  }
+
+  @media (max-width:600px){
+    .content-text{ font-size:18px; }
+    #question-text{ font-size:22px; }
+    .card{ padding:0; min-height:340px; }
+    .wrap{ padding:34px 16px 30px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="top-row">
+    <div class="counter" id="counter">FLASHCARD 01 DE 5</div>
+    <div class="category-badge" id="categoryBadge">REFLEXÃO</div>
+  </div>
+
+  <div class="card-stage">
+    <div class="card" id="card">
+      <div class="card-inner" id="cardInner">
+
+        <div class="card-face front">
+          <span class="tag">PERGUNTA</span>
+          <div class="content-text" id="question-text"></div>
+          <hr class="divider">
+          <div class="hint">Clique no cartão para ver a resposta</div>
+        </div>
+
+        <div class="card-face back">
+          <span class="tag resposta">RESPOSTA</span>
+          <div class="content-text" id="answer-text"></div>
+          <hr class="divider">
+          <div class="hint">Clique no cartão para ver a pergunta</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-row">
+    <button class="nav-btn prev" id="prevBtn" aria-label="Anterior">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+    </button>
+
+    <div class="dots" id="dots"></div>
+
+    <button class="nav-btn next" id="nextBtn" aria-label="Próximo">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+    </button>
+  </div>
+
+</div>
+
+<script>
+  const flashcards = [
+    {
+      category: "REFLEXÃO",
+      question: "O que acontece quando um raio de luz atinge uma superfície refletora?",
+      answer: "Ele é refletido de volta ao meio de origem, obedecendo à Lei da Reflexão: o ângulo de incidência é sempre igual ao ângulo de reflexão, medidos em relação à reta normal à superfície."
+    },
+    {
+      category: "LEI DA REFLEXÃO",
+      question: "Qual é a Lei da Reflexão da Luz?",
+      answer: "O raio incidente, a reta normal e o raio refletido estão no mesmo plano, e o ângulo de incidência (θi) é igual ao ângulo de reflexão (θr)."
+    },
+    {
+      category: "TIPOS DE REFLEXÃO",
+      question: "Qual a diferença entre reflexão regular e reflexão difusa?",
+      answer: "Na reflexão regular, que ocorre em superfícies lisas e polidas (como espelhos), os raios paralelos permanecem paralelos após a reflexão. Na reflexão difusa, que ocorre em superfícies rugosas, os raios são espalhados em várias direções."
+    },
+    {
+      category: "ESPELHOS PLANOS",
+      question: "Em um espelho plano, como é formada a imagem de um objeto?",
+      answer: "A imagem formada é virtual, direita e do mesmo tamanho do objeto, localizada à mesma distância do espelho que o objeto, porém no lado oposto da superfície refletora."
+    },
+    {
+      category: "REFRAÇÃO",
+      question: "Qual a diferença entre reflexão e refração da luz?",
+      answer: "Na reflexão, a luz incide sobre uma superfície e retorna ao mesmo meio, mudando apenas de direção. Na refração, a luz passa de um meio para outro (por exemplo, do ar para a água) e muda de velocidade e direção devido à mudança no índice de refração dos meios."
+    }
+  ];
+
+  let current = 0;
+  let showingAnswer = false;
+
+  const cardEl = document.getElementById('card');
+  const questionEl = document.getElementById('question-text');
+  const answerEl = document.getElementById('answer-text');
+  const counterEl = document.getElementById('counter');
+  const categoryBadgeEl = document.getElementById('categoryBadge');
+  const dotsEl = document.getElementById('dots');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+
+  function buildDots(){
+    dotsEl.innerHTML = '';
+    flashcards.forEach((_, i) => {
+      const d = document.createElement('div');
+      d.className = 'dot' + (i === current ? ' active' : '');
+      d.addEventListener('click', () => goTo(i));
+      dotsEl.appendChild(d);
+    });
+  }
+
+  function render(){
+    const total = flashcards.length;
+    const num = String(current + 1).padStart(2, '0');
+    counterEl.textContent = `FLASHCARD ${num} DE ${total}`;
+
+    const item = flashcards[current];
+    questionEl.textContent = item.question;
+    answerEl.textContent = item.answer;
+    categoryBadgeEl.textContent = item.category;
+
+    cardEl.classList.toggle('flipped', showingAnswer);
+
+    prevBtn.disabled = current === 0;
+    nextBtn.disabled = current === total - 1;
+
+    buildDots();
+  }
+
+  function goTo(index){
+    current = Math.max(0, Math.min(flashcards.length - 1, index));
+    showingAnswer = false;
+    render();
+  }
+
+  cardEl.addEventListener('click', () => {
+    showingAnswer = !showingAnswer;
+    render();
+  });
+
+  prevBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (current > 0) goTo(current - 1);
+  });
+
+  nextBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (current < flashcards.length - 1) goTo(current + 1);
+  });
+
+  render();
+</script>
+
+</body>
+</html>
